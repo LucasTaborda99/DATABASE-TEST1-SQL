@@ -1,0 +1,103 @@
+create database Db_lucas
+use Db_lucas
+
+/* Lógico_1: */
+
+CREATE TABLE cliente (
+    codcli int PRIMARY KEY,
+    nomecli varchar(50),
+    cidadecli varchar(50)
+);
+
+CREATE TABLE produto (
+    codpro int PRIMARY KEY,
+    nomepro varchar(50),
+    precopro numeric(12,2)
+);
+
+CREATE TABLE venda (
+    fk_cliente_codcli int FOREIGN KEY REFERENCES cliente (codcli),
+    fk_produto_codpro int FOREIGN KEY REFERENCES produto (codpro),
+    codven int PRIMARY KEY,
+    dataven date,
+    qtdeven numeric(12,2),
+    totalven numeric(12,2)
+);
+ 
+ insert into cliente values (1,'Lucas','Curitiba')
+ insert into cliente values (2,'Ana','São Paulo')
+ insert into cliente values (3,'João','Florianópolis')
+ insert into cliente values (4,'Maria','Porto Alegre')
+
+ insert into produto values (100,'Mouse',29.99)
+ insert into produto values (90,'Teclado',1000.99)
+ insert into produto values (140,'Monitor',990.99)
+ insert into produto values (400,'HD',980.99)
+ --drop table produto
+
+ insert into venda values (4,140,10,'20200130',500,1000)
+ insert into venda values (3,100,11,'20210620',600,2000)
+ insert into venda values (1,90,12,'20210401',400,900)
+ insert into venda values (2,400,13,'20210910',200,500)
+ --drop table venda
+
+ select * from cliente
+ select * from produto
+ select * from venda
+
+ -- Questão 4 --
+ select cli.nomecli as 'Nome do Cliente', pro.codpro as 'Código do Produto', pro.nomepro as 'Nome do Produto' from produto pro
+ inner join venda ven
+ on pro.codpro = ven.fk_produto_codpro
+ inner join cliente cli
+ on cli.codcli = ven.fk_cliente_codcli
+
+ -- Questão 5 --
+ select cli.cidadecli as 'Cidade do Cliente', sum(ven.totalven) as 'Total do Valor da Venda (R$)' from produto pro
+ inner join venda ven
+ on pro.codpro = ven.fk_produto_codpro
+ and ven.dataven >= '20210706'
+ and ven.dataven <= '20210915'
+ inner join cliente cli
+ on cli.codcli = ven.fk_cliente_codcli
+ where pro.nomepro like '%e%'
+ group by cli.cidadecli
+
+ -- Questão 6 -- 
+ select pro.precopro as 'Preço do Produto Atualizado' from produto pro
+ --update produto
+ --set precopro = precopro * 1.2
+ where nomepro like '%i%'
+
+ --select ven.totalven as 'Total de Venda Atualizado' from produto pro
+ update venda
+ set totalven = ven.qtdeven * pro.precopro from produto pro
+ inner join venda ven
+ on pro.codpro = ven.fk_produto_codpro
+ and month(ven.dataven) in (04,06,08,09)
+ and year(ven.dataven) = 2021
+ and ven.qtdeven > 50 
+
+ -- Questão 7 -- 
+ --select * from produto pro
+ delete venda from produto pro
+ inner join venda ven
+ on pro.codpro = ven.fk_produto_codpro
+ and month(ven.dataven) not in (05,07)
+ and year(ven.dataven) = 2021 
+ inner join cliente cli
+ on cli.codcli = ven.fk_cliente_codcli
+ and cli.cidadecli in ('São Paulo','Curitiba','Santos','Rio de Janeiro')
+ where pro.codpro > 10 
+ and pro.codpro < 150 
+ and pro.precopro >= 980.00
+ 
+ -- Questão 8 -- 
+ select ven.totalven as 'Total de Venda Atualizado' from venda ven
+ --update venda
+ --set totalven = ven.qtdeven * pro.precopro from venda ven
+ inner join cliente cli
+ on cli.codcli = ven.fk_cliente_codcli
+ inner join produto pro
+ on pro.codpro = ven.fk_produto_codpro
+
